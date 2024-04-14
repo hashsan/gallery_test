@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>画像ギャラリー</title>
     <style>
+      body{
+        background:#111;
+        color:white;
+      }
         /* ギャラリーのスタイル */
         .gallery {
             display: grid;
@@ -20,42 +24,50 @@
 <body>
     <div class="gallery" id="imageGallery"></div>
     <!--https://hashsan.github.io/gallery_test/img -->
+  <script>
+// GitHubのリポジトリ情報
+const owner = 'hashsan';
+const repo = 'gallery_test';
+const imagePath = '/img'; // 画像が格納されているディレクトリパス
+let page = 1;
+const pageSize = 9; // 1ページあたりの画像数
 
-    <script>
-        // GitHubのリポジトリ情報
-        const owner = 'hashsan';
-        const repo = 'gallery_test';
-        const imagePath = '/img'; // 画像が格納されているディレクトリパス
-        let page = 1;
-        const pageSize = 9; // 1ページあたりの画像数
+// GitHubのAPIを使用して指定されたページのファイル情報を取得する関数
+async function fetchRepositoryFiles() {
+  const url =`https://api.github.com/repos/${owner}/${repo}/contents${imagePath}?page=${page}&per_page=${pageSize}`
+  console.log(url)
+  const response = await fetch(url);
+  const data = await response.json();
+  page++;
+  return data;
+}
 
-        // GitHubのAPIを使用して指定されたページのファイル情報を取得する関数
-        async function fetchRepositoryFiles() {
-            const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents${imagePath}?page=${page}&per_page=${pageSize}`);
-            const data = await response.json();
-            page++;
-            return data;
-        }
+// 画像ファイルかどうかをチェックする関数
+function isImageFile(file) {
+  //console.log(file)
+  //return file.type.startsWith('image/');
+  //typeはfileでくる。
+  return true;
+}
 
-        // 画像ファイルかどうかをチェックする関数
-        function isImageFile(file) {
-            return file.type.startsWith('image/');
-        }
+// 画像を追加する関数
+async function addImagesToGallery() {
+  const gallery = document.getElementById("imageGallery");
 
-        // 画像を追加する関数
-        async function addImagesToGallery() {
-            const gallery = document.getElementById("imageGallery");
-            const files = await fetchRepositoryFiles();
-            const imageFiles = files.filter(file => isImageFile(file));
-            imageFiles.forEach(image => {
-                const imgElement = document.createElement("img");
-                imgElement.src = image.download_url;
-                imgElement.alt = image.name;
-                gallery.appendChild(imgElement);
-            });
-        }
+  const files = await fetchRepositoryFiles();
+  const imageFiles = files.filter(file => isImageFile(file));
 
-        
+  imageFiles.forEach(image => {
+
+    //console.log(image,'in')
+
+    const imgElement = document.createElement("img");
+    imgElement.src = image.download_url;
+    imgElement.alt = image.name;
+    gallery.appendChild(imgElement);
+  });
+}
+
 // スクロール位置を監視し、無限スクロールを実現する関数（間引き処理付き）
 let throttleTimer;
 window.addEventListener('scroll', () => {
@@ -70,7 +82,7 @@ window.addEventListener('scroll', () => {
 });
 // ページ読み込み時に初めの画像を追加
 window.onload = addImagesToGallery;
-        
-    </script>
+    
+  </script>
 </body>
 </html>
