@@ -55,15 +55,22 @@
             });
         }
 
-        // スクロール位置を監視し、無限スクロールを実現する関数
-        window.addEventListener('scroll', () => {
-            if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-                addImagesToGallery();
-            }
-        });
-
-        // ページ読み込み時に初めの画像を追加
-        window.onload = addImagesToGallery;
+        
+// スクロール位置を監視し、無限スクロールを実現する関数（間引き処理付き）
+let throttleTimer;
+window.addEventListener('scroll', () => {
+  if (!throttleTimer) {
+    throttleTimer = setTimeout(() => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        addImagesToGallery();
+      }
+      throttleTimer = null;
+    }, 200); // 200ミリ秒間隔で間引く
+  }
+});
+// ページ読み込み時に初めの画像を追加
+window.onload = addImagesToGallery;
+        
     </script>
 </body>
 </html>
